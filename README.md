@@ -1,6 +1,6 @@
-# Alkane Pandas Collection
+# Orbital Royalty Collection
 
-The collection contract for Alkane Pandas.
+The collection contract for orbitals with enforced royalties
 
 ## Building
 
