@@ -84,17 +84,22 @@ This checklist ensures the unavoidable royalty system is production-ready, secur
 - [ ] 🎯 **Deployment Bitcoin** available in wallet
 - [ ] 💵 **Additional testing funds** reserved
 
-### **🏦 Address Configuration Finalized**
-- [ ] 🎯 **Royalty recipient address** confirmed and tested
-- [ ] 💰 **Primary sales address** confirmed and tested
-- [ ] 🔐 **Address ownership** verified with signatures
+### **🏦 Multi-Token Configuration Finalized** 
+- [ ] 🪙 **frBTC contract** deployed on mainnet and ID recorded
+- [ ] 🪙 **BUSD contract** deployed on mainnet and ID recorded
+- [ ] 🎯 **FRBTC_TOKEN_ID** updated with actual mainnet AlkaneId
+- [ ] 🎯 **BUSD_TOKEN_ID** updated with actual mainnet AlkaneId
+- [ ] 🔐 **Collection contract ownership** verified with signatures
 - [ ] 🔑 **Private keys** securely stored and backed up
 
-### **📊 Economic Parameters Finalized**
-- [ ] 💰 **Mint price** confirmed (0.0001 BTC)
-- [ ] 📈 **Royalty percentage** confirmed (5%)
-- [ ] 💸 **Minimum royalty** confirmed (1000 sats)
-- [ ] 🎯 **Maximum batch size** confirmed (3 NFTs)
+### **📊 Multi-Token Economic Parameters Finalized**
+- [ ] 💰 **frBTC mint price** confirmed (e.g., 10,000 sats = 0.0001 BTC)
+- [ ] 💰 **BUSD mint price** confirmed (e.g., 1,000,000 units = $10)
+- [ ] 📈 **Royalty percentage** confirmed (5% for both tokens)
+- [ ] 💸 **Minimum royalty** confirmed (1000 sats minimum for both)
+- [ ] 🎯 **Maximum batch size** confirmed (3 NFTs per transaction)
+- [ ] 💳 **Multi-token withdrawal functions** tested (opcodes 201, 202, 203)
+- [ ] 🔍 **Token query functions** working (accepted tokens, prices)
 
 ---
 

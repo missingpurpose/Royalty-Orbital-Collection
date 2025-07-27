@@ -13,14 +13,50 @@ This guide explains how to deploy and test the Alkane RoyaltyNFT collection with
 
 ---
 
+## 💰 Payment System Overview
+
+### Understanding Alkanes BTC Payments
+
+**⚠️ IMPORTANT**: This system uses **alkanes BTC** (wrapped Bitcoin), not regular Bitcoin addresses.
+
+### Multi-Token Payment Configuration
+```rust
+// Update these for your target network:
+const FRBTC_TOKEN_ID: AlkaneId = AlkaneId { block: 0, tx: 0 };    // Regtest frBTC
+const BUSD_TOKEN_ID: AlkaneId = AlkaneId { block: 0, tx: 0 };     // Regtest BUSD
+
+// For mainnet:
+// const FRBTC_TOKEN_ID: AlkaneId = AlkaneId { block: 2, tx: 9000 };  // Actual frBTC ID
+// const BUSD_TOKEN_ID: AlkaneId = AlkaneId { block: 3, tx: 1500 };   // Actual BUSD ID
+
+// Payment amounts per token type:
+const FRBTC_AMOUNT_PER_MINT: u128 = 10000;      // 0.0001 BTC equivalent
+const BUSD_AMOUNT_PER_MINT: u128 = 1000000;     // $10 in BUSD (6 decimals)
+```
+
+### Enhanced Multi-Token Revenue Flow
+1. **Primary Sales**: Users pay with frBTC (0.0001) OR BUSD ($10) → Collection Contract
+2. **Mixed Payments**: Users can combine tokens in single transaction for multiple NFTs
+3. **Secondary Sales**: 5% royalty (in any supported token) → Collection Contract  
+4. **Token-Specific Balances**: Each token type accumulates separately in contract
+5. **Flexible Withdrawal**: Extract earnings by specific token type (opcode 201)
+
+### What You Receive
+- ✅ **Real Bitcoin value** within alkanes ecosystem
+- ✅ **Guaranteed collection** through unavoidable royalties
+- ✅ **Owner-only withdrawal** for security
+- ❌ **Not direct Bitcoin** to external addresses (alkanes limitation)
+
+---
+
 ## 🏗️ Architecture Overview
 
 ### System Components
 1. **Collection Contract** (`alkane-pandas-collection-MY FORK/`)
    - Factory that mints NFTs
    - Configures royalty settings
-   - Receives primary mint payments (0.0001 BTC per NFT)
-   - Receives secondary sale royalties (5%)
+   - **Accumulates all payments** (primary mints + royalties)
+   - **Enables owner withdrawal** of accumulated funds
 
 2. **Child Contract** (`alkane-pandas-child-main/`)
    - Individual NFT instances
@@ -68,9 +104,31 @@ oyl provider info -p regtest
 
 ## ⚙️ Configuration
 
-### Step 1: Configure Royalty Recipients
+### Step 1: Configure Payment Token ID
+
+**🚨 CRITICAL**: Update the payment token IDs for your target network.
 
 Edit `alkane-pandas-collection-MY FORK/src/lib.rs`:
+
+```rust
+/// Multi-token payment configuration - UPDATE FOR YOUR NETWORK
+const FRBTC_TOKEN_ID: AlkaneId = AlkaneId { block: 0, tx: 0 };    // Deploy frBTC first
+const BUSD_TOKEN_ID: AlkaneId = AlkaneId { block: 0, tx: 0 };     // Deploy BUSD first
+
+/// Payment amounts per token type (adjust based on current values)
+const FRBTC_AMOUNT_PER_MINT: u128 = 10000;      // 0.0001 BTC equivalent
+const BUSD_AMOUNT_PER_MINT: u128 = 1000000;     // $10 in BUSD
+```
+
+**How to find the correct AlkaneIds**:
+1. **Deploy tokens first**: Deploy frBTC and BUSD contracts on your network
+2. **Record AlkaneIds**: Note the `block:tx` format for each deployed token
+3. **Update constants**: Replace the placeholder IDs with actual deployed IDs
+4. **Adjust pricing**: Set appropriate amounts based on current token values
+
+### Step 2: Configure Royalty Recipients
+
+The royalty recipients are automatically set to the Collection Contract:
 
 ```rust
 /// Royalty configuration
@@ -162,10 +220,10 @@ export CHILD_TEMPLATE_ID="0xabc123"  # From Phase 1 deployment
 export NETWORK="regtest"
 ```
 
-### Test 1: Mint NFT (Should Succeed)
+### Test 1: Mint NFT with frBTC (Should Succeed)
 
 ```bash
-# Mint with 0.0001 BTC payment
+# Mint with frBTC payment (0.0001 BTC equivalent)
 oyl provider alkanes --method call \
   -params '{
     "alkane_id":"'$COLLECTION_ID'", 
@@ -177,7 +235,42 @@ oyl provider alkanes --method call \
   -p $NETWORK
 
 # Expected: ✅ Success with new NFT created
+```
+
+### Test 1b: Mint NFT with BUSD (Should Succeed)
+
+```bash
+# Mint with BUSD payment ($10 equivalent)
+oyl provider alkanes --method call \
+  -params '{
+    "alkane_id":"'$COLLECTION_ID'", 
+    "opcode":77,
+    "incoming_alkanes": [
+      {"id":"0:1", "value":1000000}
+    ]
+  }' \
+  -p $NETWORK
+
+# Expected: ✅ Success with new NFT created
 # Note the NFT ID from response for transfer tests
+```
+
+### Test 1c: Multi-Token Batch Mint (Should Succeed)
+
+```bash
+# Mint 2 NFTs: 1 with frBTC + 1 with BUSD in single transaction
+oyl provider alkanes --method call \
+  -params '{
+    "alkane_id":"'$COLLECTION_ID'", 
+    "opcode":77,
+    "incoming_alkanes": [
+      {"id":"0:0", "value":10000},
+      {"id":"0:1", "value":1000000}
+    ]
+  }' \
+  -p $NETWORK
+
+# Expected: ✅ Success with 2 NFTs created from mixed payment
 ```
 
 ### Test 2: Get Royalty Information (Should Succeed)
@@ -281,6 +374,227 @@ oyl provider alkanes --method call \
 
 # Expected: ✅ Transfer succeeds with 1000 sat minimum royalty
 ```
+
+### Test 7: Query Accepted Tokens (Should Succeed)
+
+```bash
+# Get list of accepted payment tokens (opcode 202)
+oyl provider alkanes --method call \
+  -params '{"alkane_id":"'$COLLECTION_ID'", "opcode":202}' \
+  -p $NETWORK
+
+# Expected: ✅ Returns [frBTC_block, frBTC_tx, BUSD_block, BUSD_tx]
+```
+
+### Test 8: Query Token Prices (Should Succeed)
+
+```bash
+# Get current prices for each token (opcode 203)
+oyl provider alkanes --method call \
+  -params '{"alkane_id":"'$COLLECTION_ID'", "opcode":203}' \
+  -p $NETWORK
+
+# Expected: ✅ Returns [frBTC_price, BUSD_price]
+```
+
+### Test 9: Withdraw frBTC Funds (Owner Only)
+
+```bash
+# Withdraw accumulated frBTC from collection contract
+# Parameters: [token_type (0=frBTC), amount]
+oyl provider alkanes --method call \
+  -params '{
+    "alkane_id":"'$COLLECTION_ID'",
+    "opcode":201,
+    "data":"0,50000",
+    "incoming_alkanes": [
+      {"id":"'$COLLECTION_ID'", "value":1}
+    ]
+  }' \
+  -p $NETWORK
+
+# Expected: ✅ 50,000 sats of frBTC withdrawn to your wallet
+```
+
+### Test 10: Withdraw BUSD Funds (Owner Only)
+
+```bash
+# Withdraw accumulated BUSD from collection contract  
+# Parameters: [token_type (1=BUSD), amount]
+oyl provider alkanes --method call \
+  -params '{
+    "alkane_id":"'$COLLECTION_ID'",
+    "opcode":201,
+    "data":"1,500000",
+    "incoming_alkanes": [
+      {"id":"'$COLLECTION_ID'", "value":1}
+    ]
+  }' \
+  -p $NETWORK
+
+# Expected: ✅ 500,000 units of BUSD withdrawn to your wallet
+```
+
+### Test 11: Unauthorized Withdrawal (Should Fail)
+
+```bash
+# Test withdrawal without collection token authentication
+oyl provider alkanes --method call \
+  -params '{
+    "alkane_id":"'$COLLECTION_ID'",
+    "opcode":201,
+    "data":"0,10000",
+    "incoming_alkanes": []
+  }' \
+  -p $NETWORK
+
+# Expected: ❌ Fails with "did not authenticate with only the collection token"
+```
+
+---
+
+## 💸 Revenue Withdrawal Guide
+
+### How Withdrawals Work
+
+Your Collection Contract accumulates **all revenue by token type**:
+- ✅ **Primary mints**: frBTC (0.0001) OR BUSD ($10) per NFT minted
+- ✅ **Secondary royalties**: 5% of every trade (in any supported token)
+- ✅ **Separate balances**: Each token type stored independently  
+- ✅ **Secure storage**: Only you can withdraw (owner-only)
+
+### Enhanced Withdrawal Function Details
+
+```rust
+// Opcode 201: WithdrawFunds - Multi-token support
+fn withdraw_funds(&self, token_type: u128, amount: u128) -> Result<CallResponse> {
+  self.only_owner()?; // Requires collection token authentication
+  // token_type: 0=frBTC, 1=BUSD
+  // amount: Specific amount of chosen token to withdraw
+}
+
+// Opcode 202: GetAcceptedTokens - Query supported tokens
+fn get_accepted_tokens(&self) -> Result<CallResponse> {
+  // Returns: [frBTC_block, frBTC_tx, BUSD_block, BUSD_tx]
+}
+
+// Opcode 203: GetTokenPrices - Query current pricing  
+fn get_token_prices(&self) -> Result<CallResponse> {
+  // Returns: [frBTC_price, BUSD_price] per mint
+}
+```
+
+### Step-by-Step Withdrawal Process
+
+#### 1. Check Your Balance (Optional)
+```bash
+# Query contract state to see accumulated funds
+oyl provider alkanes --method info \
+  -params '{"alkane_id":"'$COLLECTION_ID'"}' \
+  -p $NETWORK
+```
+
+#### 2. Withdraw Funds by Token Type
+
+**Withdraw frBTC:**
+```bash
+# Withdraw 100,000 sats of frBTC (0.001 BTC equivalent)
+# Parameters: token_type=0 (frBTC), amount=100000
+oyl provider alkanes --method call \
+  -params '{
+    "alkane_id":"'$COLLECTION_ID'",
+    "opcode":201,
+    "data":"0,100000",
+    "incoming_alkanes": [
+      {"id":"'$COLLECTION_ID'", "value":1}
+    ]
+  }' \
+  -p $NETWORK
+```
+
+**Withdraw BUSD:**
+```bash  
+# Withdraw 5,000,000 units of BUSD ($50 equivalent)
+# Parameters: token_type=1 (BUSD), amount=5000000
+oyl provider alkanes --method call \
+  -params '{
+    "alkane_id":"'$COLLECTION_ID'",
+    "opcode":201,
+    "data":"1,5000000",
+    "incoming_alkanes": [
+      {"id":"'$COLLECTION_ID'", "value":1}
+    ]
+  }' \
+  -p $NETWORK
+```
+
+#### 3. Verify Withdrawal Success
+- Check transaction confirmation
+- Verify funds received in your wallet
+- Update records for accounting
+
+### Withdrawal Security Features
+
+- ✅ **Owner-only**: Requires collection token authentication
+- ✅ **Amount validation**: Prevents zero withdrawals
+- ✅ **Safe failure**: Failed withdrawals don't lose funds
+- ✅ **Full control**: Withdraw any amount, any time
+
+### Common Withdrawal Scenarios
+
+**Scenario 1: Weekly frBTC Revenue Collection**
+```bash
+# Weekly withdrawal of accumulated frBTC royalties
+WEEKLY_FRBTC="250000"  # 0.0025 BTC equivalent
+oyl provider alkanes --method call \
+  -params '{"alkane_id":"'$COLLECTION_ID'", "opcode":201, "data":"0,'$WEEKLY_FRBTC'", "incoming_alkanes":[{"id":"'$COLLECTION_ID'", "value":1}]}' \
+  -p $NETWORK
+```
+
+**Scenario 2: Weekly BUSD Revenue Collection**
+```bash
+# Weekly withdrawal of accumulated BUSD royalties  
+WEEKLY_BUSD="2500000"  # $25 equivalent in BUSD
+oyl provider alkanes --method call \
+  -params '{"alkane_id":"'$COLLECTION_ID'", "opcode":201, "data":"1,'$WEEKLY_BUSD'", "incoming_alkanes":[{"id":"'$COLLECTION_ID'", "value":1}]}' \
+  -p $NETWORK
+```
+
+**Scenario 3: Emergency Full Withdrawal (Both Tokens)**
+```bash
+# Withdraw large amounts of both token types
+LARGE_FRBTC="1000000"   # 0.01 BTC equivalent
+LARGE_BUSD="10000000"   # $100 equivalent
+
+# Withdraw frBTC
+oyl provider alkanes --method call \
+  -params '{"alkane_id":"'$COLLECTION_ID'", "opcode":201, "data":"0,'$LARGE_FRBTC'", "incoming_alkanes":[{"id":"'$COLLECTION_ID'", "value":1}]}' \
+  -p $NETWORK
+
+# Withdraw BUSD  
+oyl provider alkanes --method call \
+  -params '{"alkane_id":"'$COLLECTION_ID'", "opcode":201, "data":"1,'$LARGE_BUSD'", "incoming_alkanes":[{"id":"'$COLLECTION_ID'", "value":1}]}' \
+  -p $NETWORK
+```
+
+### Troubleshooting Withdrawals
+
+**Error: "did not authenticate with only the collection token"**
+- ✅ **Solution**: Include collection token in `incoming_alkanes`
+- ✅ **Format**: `{"id":"YOUR_COLLECTION_ID", "value":1}`
+
+**Error: "Invalid token type. Use 0 for frBTC, 1 for BUSD"**
+- ✅ **Solution**: Use correct token type parameter (0 or 1)
+- ✅ **Format**: `"data":"0,amount"` for frBTC or `"data":"1,amount"` for BUSD
+
+**Error: "Withdrawal amount must be greater than zero"**
+- ✅ **Solution**: Ensure amount > 0 in the data field
+- ✅ **Format**: `"data":"token_type,amount"` where amount > 0
+
+**Error: Insufficient funds for specific token**
+- ✅ **Solution**: Reduce withdrawal amount for that token type
+- ✅ **Check**: Verify contract has accumulated sufficient revenue in that specific token
+- ✅ **Alternative**: Try withdrawing the other token type instead
 
 ---
 

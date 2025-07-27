@@ -17,12 +17,20 @@ use std::sync::Arc;
 mod svg_generator;
 use svg_generator::SvgGenerator;
 
-/// Orbital template ID
+/// Orbital template ID / Child contract template
 const ROYALTY_NFT_ORBITAL_TEMPLATE_ID: u128 = 0x378;
 
-/// Payment configuration
-const PAYMENT_AMOUNT_PER_MINT: u128 = 10000; // 0.0001 BTC in satoshis
-const PAYMENT_TOKEN_ID: AlkaneId = AlkaneId { block: 0, tx: 0 }; // BTC token ID
+/// Payment configuration - Multi-token support
+/// UPDATE THESE IDs FOR YOUR TARGET NETWORK
+
+/// For regtest, deploy your wrapped tokens first and update these IDs
+/// For mainnet, use the actual deployed token IDs
+const FRBTC_TOKEN_ID: AlkaneId = AlkaneId { block: 0, tx: 0 }; // UPDATE: Deploy frBTC first
+const BUSD_TOKEN_ID: AlkaneId = AlkaneId { block: 0, tx: 0 };  // UPDATE: Deploy BUSD first
+
+/// Payment amounts per token type (adjust based on token values)
+const FRBTC_AMOUNT_PER_MINT: u128 = 10000; // 0.0001 BTC equivalent in satoshis
+const BUSD_AMOUNT_PER_MINT: u128 = 1000000; // $10 in BUSD (assuming 6 decimals)
 
 /// Batch minting limits
 const MAX_PURCHASE_PER_TX: u128 = 3; // Maximum NFTs per transaction
@@ -33,6 +41,39 @@ const ROYALTY_RECIPIENT: AlkaneId = AlkaneId { block: 2, tx: 0 }; // Collection 
 
 /// Primary sales configuration
 const PRIMARY_SALES_RECIPIENT: AlkaneId = AlkaneId { block: 2, tx: 0 }; // Where primary mint payments go
+
+/// Supported payment tokens
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum PaymentToken {
+    FrBTC,
+    BUSD,
+}
+
+impl PaymentToken {
+    fn get_id(&self) -> AlkaneId {
+        match self {
+            PaymentToken::FrBTC => FRBTC_TOKEN_ID,
+            PaymentToken::BUSD => BUSD_TOKEN_ID,
+        }
+    }
+    
+    fn get_price_per_mint(&self) -> u128 {
+        match self {
+            PaymentToken::FrBTC => FRBTC_AMOUNT_PER_MINT,
+            PaymentToken::BUSD => BUSD_AMOUNT_PER_MINT,
+        }
+    }
+    
+    fn from_alkane_id(id: &AlkaneId) -> Option<PaymentToken> {
+        if *id == FRBTC_TOKEN_ID {
+            Some(PaymentToken::FrBTC)
+        } else if *id == BUSD_TOKEN_ID {
+            Some(PaymentToken::BUSD)
+        } else {
+            None
+        }
+    }
+}
 
 #[derive(Default)]
 pub struct RoyaltyNFTCollection(());
@@ -85,6 +126,17 @@ enum RoyaltyNFTCollectionMessage {
   #[opcode(200)]
   #[returns(Vec<u8>)]
   GetRoyaltyInfo,
+
+  #[opcode(201)]
+  WithdrawFunds { token_type: u128, amount: u128 },
+
+  #[opcode(202)]
+  #[returns(Vec<u8>)]
+  GetAcceptedTokens,
+
+  #[opcode(203)]
+  #[returns(Vec<u8>)]
+  GetTokenPrices,
 }
 
 impl Token for RoyaltyNFTCollection {
@@ -135,13 +187,9 @@ impl RoyaltyNFTCollection {
     let context = self.context()?;
     let mut response = CallResponse::forward(&context.incoming_alkanes);
 
-    // Calculate how many NFTs can be purchased
+    // Calculate how many NFTs can be purchased with the provided payment
     let purchase_count = self.calculate_purchase_count()?;
     
-    // Verify payment for the calculated count
-    let total_required = purchase_count * PAYMENT_AMOUNT_PER_MINT;
-    self.verify_payment(total_required)?;
-
     // Mint multiple orbitals in one transaction
     let mut minted_orbitals = Vec::new();
     for _ in 0..purchase_count {
@@ -186,7 +234,7 @@ impl RoyaltyNFTCollection {
   }
 
   fn max_mints(&self) -> u128 {
-    10000
+    3333
   }
 
 
@@ -275,17 +323,17 @@ impl RoyaltyNFTCollection {
     Ok(new_count)
   }
 
-  fn verify_payment(&self, required_amount: u128) -> Result<()> {
+  fn verify_payment(&self, required_amount: u128, payment_token: PaymentToken) -> Result<()> {
     let context = self.context()?;
     
-    // Check for payment in incoming alkanes
+    // Check for payment in incoming alkanes for the specific token
     let total_payment = context.incoming_alkanes.0.iter()
-      .filter(|transfer| transfer.id == PAYMENT_TOKEN_ID)
+      .filter(|transfer| transfer.id == payment_token.get_id())
       .map(|transfer| transfer.value)
       .sum::<u128>();
     
     if total_payment < required_amount {
-      return Err(anyhow!("Insufficient payment: {} satoshis required, {} provided", required_amount, total_payment));
+      return Err(anyhow!("Insufficient payment: {} units of {:?} required, {} provided", required_amount, payment_token, total_payment));
     }
     
     Ok(())
@@ -294,25 +342,24 @@ impl RoyaltyNFTCollection {
   fn calculate_purchase_count(&self) -> Result<u128> {
     let context = self.context()?;
     
-    // Calculate total payment received
-    let total_payment = context.incoming_alkanes.0.iter()
-      .filter(|transfer| transfer.id == PAYMENT_TOKEN_ID)
-      .map(|transfer| transfer.value)
-      .sum::<u128>();
+    let mut total_purchase_count = 0u128;
     
-    if total_payment == 0 {
-      return Err(anyhow!("No payment provided"));
+    // Calculate purchase count for each supported token
+    for transfer in &context.incoming_alkanes.0 {
+      if let Some(payment_token) = PaymentToken::from_alkane_id(&transfer.id) {
+        let price_per_mint = payment_token.get_price_per_mint();
+        let purchase_count_for_token = transfer.value / price_per_mint;
+        total_purchase_count += purchase_count_for_token;
+      }
     }
     
-    // Calculate how many NFTs can be purchased
-    let purchase_count = total_payment / PAYMENT_AMOUNT_PER_MINT;
-    
-    if purchase_count == 0 {
-      return Err(anyhow!("Insufficient payment: {} satoshis required per mint, {} provided", PAYMENT_AMOUNT_PER_MINT, total_payment));
+    if total_purchase_count == 0 {
+      return Err(anyhow!("No valid payment provided. Accepted tokens: frBTC ({}), BUSD ({})", 
+                         FRBTC_AMOUNT_PER_MINT, BUSD_AMOUNT_PER_MINT));
     }
     
     // Apply maximum purchase limit
-    let final_count = std::cmp::min(purchase_count, MAX_PURCHASE_PER_TX);
+    let final_count = std::cmp::min(total_purchase_count, MAX_PURCHASE_PER_TX);
     
     Ok(final_count)
   }
@@ -395,6 +442,64 @@ impl RoyaltyNFTCollection {
     data.extend_from_slice(&ROYALTY_PERCENTAGE.to_le_bytes());
     data.extend_from_slice(&context.myself.block.to_le_bytes()); // Collection contract receives royalties
     data.extend_from_slice(&context.myself.tx.to_le_bytes());
+    
+    response.data = data;
+    Ok(response)
+  }
+
+  /// Withdraw funds for a specific token type
+  /// Parameters: [token_type (0=frBTC, 1=BUSD), amount]
+  fn withdraw_funds(&self, token_type: u128, amount: u128) -> Result<CallResponse> {
+    // Only the contract owner can withdraw funds
+    self.only_owner()?;
+    
+    let context = self.context()?;
+    let mut response = CallResponse::forward(&context.incoming_alkanes);
+    
+    // Verify withdrawal amount is reasonable (not zero, not excessive)
+    if amount == 0 {
+      return Err(anyhow!("Withdrawal amount must be greater than zero"));
+    }
+    
+    // Determine which token to withdraw
+    let payment_token = match token_type {
+      0 => PaymentToken::FrBTC,
+      1 => PaymentToken::BUSD,
+      _ => return Err(anyhow!("Invalid token type. Use 0 for frBTC, 1 for BUSD")),
+    };
+    
+    // Transfer the requested amount of the specified token to the caller
+    response.alkanes.0.push(AlkaneTransfer {
+      id: payment_token.get_id(),
+      value: amount,
+    });
+    
+    Ok(response)
+  }
+
+  fn get_accepted_tokens(&self) -> Result<CallResponse> {
+    let context = self.context()?;
+    let mut response = CallResponse::forward(&context.incoming_alkanes);
+    
+    // Return accepted token IDs: [frBTC_block, frBTC_tx, BUSD_block, BUSD_tx]
+    let mut data = Vec::new();
+    data.extend_from_slice(&FRBTC_TOKEN_ID.block.to_le_bytes());
+    data.extend_from_slice(&FRBTC_TOKEN_ID.tx.to_le_bytes());
+    data.extend_from_slice(&BUSD_TOKEN_ID.block.to_le_bytes());
+    data.extend_from_slice(&BUSD_TOKEN_ID.tx.to_le_bytes());
+    
+    response.data = data;
+    Ok(response)
+  }
+
+  fn get_token_prices(&self) -> Result<CallResponse> {
+    let context = self.context()?;
+    let mut response = CallResponse::forward(&context.incoming_alkanes);
+    
+    // Return token prices: [frBTC_price, BUSD_price]
+    let mut data = Vec::new();
+    data.extend_from_slice(&FRBTC_AMOUNT_PER_MINT.to_le_bytes());
+    data.extend_from_slice(&BUSD_AMOUNT_PER_MINT.to_le_bytes());
     
     response.data = data;
     Ok(response)

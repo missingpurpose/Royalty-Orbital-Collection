@@ -23,12 +23,16 @@ This checklist ensures everything is ready for regtest deployment and testing of
 - [ ] 📡 **Network connectivity** verified (`oyl provider info -p regtest`)
 - [ ] 💰 **Regtest Bitcoin** available for testing
 
-### **📝 Contract Configuration**
-- [ ] 🎯 **Royalty recipient configured** (based on research findings)
-- [ ] 💰 **Primary sales recipient configured**
-- [ ] 🔢 **Royalty percentage set** (currently 5% = 500 basis points)
-- [ ] 💸 **Minimum royalty amount set** (currently 1000 sats)
-- [ ] 🎪 **Template ID placeholder** ready for update after child deployment
+### **📝 Multi-Token Contract Configuration**
+- [ ] 🪙 **Token contracts deployed first** (frBTC and BUSD on regtest)
+- [ ] 🎯 **FRBTC_TOKEN_ID updated** with actual deployed frBTC AlkaneId
+- [ ] 🎯 **BUSD_TOKEN_ID updated** with actual deployed BUSD AlkaneId  
+- [ ] 💰 **Token pricing configured** (FRBTC_AMOUNT_PER_MINT, BUSD_AMOUNT_PER_MINT)
+- [ ] 🏦 **Royalty recipients configured** (Collection Contract receives all payments)
+- [ ] 🔢 **Royalty percentage set** (5% = 500 basis points)
+- [ ] 💸 **Minimum royalty amount set** (1000 sats minimum)
+- [ ] 🎪 **Template ID** ready for update after child deployment (currently `0x378`)
+- [ ] 💰 **Multi-token withdrawal functions** implemented (opcodes 201, 202, 203)
 
 ### **🔧 Code Quality Verification**
 - [ ] ✅ **Collection contract compiles** (`cargo check`)
@@ -37,11 +41,13 @@ This checklist ensures everything is ready for regtest deployment and testing of
 - [ ] 📏 **WASM file sizes reasonable** (< 500KB each)
 - [ ] ⚠️ **No critical compilation warnings**
 
-### **🧪 Unit Testing (Optional but Recommended)**
-- [ ] 🧮 **Royalty calculation logic** tested manually
-- [ ] 💰 **Payment verification logic** tested manually
-- [ ] 🔍 **Minimum royalty enforcement** tested manually
-- [ ] 📊 **Edge cases identified** (zero payments, overflow, etc.)
+### **🧪 Multi-Token Testing (Optional but Recommended)**
+- [ ] 🧮 **Royalty calculation logic** tested manually for both tokens
+- [ ] 💰 **Multi-token payment verification** tested manually
+- [ ] 🔍 **Minimum royalty enforcement** tested for both tokens
+- [ ] 🎯 **Token-specific pricing** calculations verified
+- [ ] 📊 **Mixed payment scenarios** (frBTC + BUSD in single transaction)
+- [ ] 💸 **Edge cases identified** (zero payments, single token, overflow, etc.)
 
 ---
 
