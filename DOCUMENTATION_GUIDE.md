@@ -1,13 +1,39 @@
 # 📖 **Documentation Guide: How to Use These Files**
 
-This guide explains what each documentation file is for and how you should use them to successfully deploy your unavoidable royalty NFT system.
+This guide explains what each documentation file is for and how you should use them to successfully deploy your revolutionary unavoidable royalty NFT system.
+
+**📁 Your Setup**:
+- Docker Regtest: `/Volumes/btc-node/everything-alkanes/alkanes-dev-environment`
+- OYL SDK: `/Volumes/btc-node/everything-alkanes/oyl-sdk-main-`  
+- Collection: `/Volumes/btc-node/everything-alkanes/My-Contracts/alkane-pandas-collection-MY FORK`
+- Child: `/Volumes/btc-node/everything-alkanes/My-Contracts/alkane-pandas-child-main`
 
 ---
 
 ## 📋 **File Overview & Usage Order**
 
-### **🔍 1. PRE_DEPLOYMENT_RESEARCH.md**
-**Purpose**: ✅ **COMPLETED** - Research findings on alkanes architecture limitations
+### **🏗️ 1. SYSTEM_ARCHITECTURE.md**
+**Purpose**: 📖 **MASTER TECHNICAL REFERENCE** - Complete system understanding
+
+**What it contains**:
+- ✅ Comprehensive analysis of both Collection and Child contracts
+- ✅ Integration architecture with data flow diagrams  
+- ✅ Revolutionary features breakdown (100% unavoidable royalties)
+- ✅ Technical specifications and marketplace requirements
+- ✅ Production readiness assessment
+
+**How to use**:
+- 📖 **Read first** - Understand the entire system architecture
+- 🎯 **Reference during development** - Technical details and opcode tables
+- 🏪 **Share with marketplaces** - Integration requirements
+- 📊 **Use for presentations** - System comparison tables
+
+**When to use**: Before starting any deployment work
+
+---
+
+### **🔍 2. PRE_DEPLOYMENT_RESEARCH.md**
+**Purpose**: ✅ **COMPLETED** - Research findings on alkanes architecture
 
 **What it contains**:
 - ✅ Confirmed that alkanes cannot send to external Bitcoin addresses
@@ -22,171 +48,168 @@ This guide explains what each documentation file is for and how you should use t
 
 ---
 
-### **📋 2. PRE_REGTEST_CHECKLIST.md** 
+### **📋 3. PRE_REGTEST_CHECKLIST.md** 
 **Purpose**: 🔄 **USE THIS NEXT** - Prepare for regtest deployment and testing
 
 **What it contains**:
-- Environment setup verification (Rust, OYL SDK, regtest)
-- Contract compilation checks
-- Configuration verification
-- Pre-deployment risk assessment
-- Success criteria definition
+- ✅ Environment setup verification (Docker regtest, OYL SDK)
+- ✅ Contract build status (WASM files compressed and ready)
+- 🎯 **Token deployment strategy** (deploy frBTC and BUSD test tokens first)
+- 📋 **Contract deployment sequence** (Child template → Collection contract)
+- 🧪 Pre-deployment testing checklist
+- ✅ Success criteria definition
 
 **How to use**:
 1. 📋 **Work through each checklist item** systematically
 2. ✅ **Check off completed items** as you go
-3. 🚫 **Do not proceed** if any high-risk items fail
-4. 🎯 **Only move to deployment** when ALL items complete
+3. 🪙 **Start with token deployment** (frBTC and BUSD test tokens)
+4. 🔧 **Update contract configurations** with actual token IDs
+5. 🎯 **Only move to contract deployment** when ALL items complete
 
-**When to use**: Before your first regtest deployment
+**When to use**: **RIGHT NOW** - This is your next step
 
 ---
 
-### **🚀 3. ROYALTY_DEPLOYMENT_GUIDE.md**
+### **🪙 4. MULTI_TOKEN_DEPLOYMENT_GUIDE.md**
+**Purpose**: 📖 **TOKEN SETUP INSTRUCTIONS** - Deploy and configure payment tokens
+
+**What it contains**:
+- Step-by-step token deployment process
+- Configuration instructions for frBTC and BUSD tokens
+- Integration with collection contract constants
+- Token testing procedures
+
+**How to use**:
+1. 🏗️ **Deploy test tokens first** (before contracts)
+2. 📝 **Record AlkaneIds** for contract configuration
+3. 🔧 **Update collection contract** with real token IDs
+4. 🧪 **Test token functionality** before proceeding
+
+**When to use**: During Phase 1 of deployment (token setup)
+
+---
+
+### **🚀 5. ROYALTY_DEPLOYMENT_GUIDE.md**
 **Purpose**: 📖 **MAIN DEPLOYMENT GUIDE** - Step-by-step deployment and testing
 
 **What it contains**:
 - Multi-token payment system overview
 - Configuration instructions (token IDs, pricing)
-- Detailed deployment steps (child first, then collection)
+- Complete deployment sequence (tokens → child → collection)
 - 11 comprehensive test scenarios
 - Revenue withdrawal guide
-- Marketplace integration examples
 - Troubleshooting section
 
 **How to use**:
-1. 🔧 **Configure token IDs** for your network (Step 1)
-2. 🏗️ **Follow deployment steps** in exact order
-3. 🧪 **Run all 11 tests** to verify functionality
-4. 💰 **Practice withdrawal** procedures
-5. 📚 **Reference troubleshooting** if issues arise
+1. 📋 **Follow after completing PRE_REGTEST_CHECKLIST.md**
+2. 🎯 **Use OYL SDK commands** provided in examples
+3. 🧪 **Execute all test scenarios** to verify functionality
+4. 💰 **Test withdrawal functions** for revenue management
+5. 📝 **Document all deployed AlkaneIds** for mainnet preparation
 
-**When to use**: During actual deployment and testing phases
+**When to use**: During actual deployment and testing
 
 ---
 
-### **🚨 4. PRE_MAINNET_CHECKLIST.md**
-**Purpose**: 🔒 **MAINNET SAFETY** - Comprehensive pre-production checklist
+### **🚨 6. PRE_MAINNET_CHECKLIST.md**
+**Purpose**: 🔒 **PRODUCTION SAFETY** - Final verification before mainnet
 
 **What it contains**:
-- Mandatory prerequisites (48+ hours regtest success)
-- Security audit requirements
-- Comprehensive testing verification
-- Financial preparation (costs, addresses)
-- Risk management procedures
-- Final authorization process
+- Mainnet configuration requirements
+- Economic parameter verification
+- Security audit checklist
+- Performance optimization verification
+- Legal and compliance considerations
 
 **How to use**:
-1. ⏰ **Only use AFTER** successful regtest deployment
-2. 📋 **Complete every single item** - no exceptions
-3. 👥 **Get team approval** for high-risk sections
-4. 🔒 **Triple-check** all configurations
-5. 💰 **Verify financial** setups and recipient addresses
+1. ✅ **Complete only after successful regtest deployment**
+2. 📋 **Work through each item** methodically
+3. 🔍 **Triple-check all configurations** for mainnet
+4. 💰 **Verify economic parameters** are production-appropriate
+5. 🛡️ **Ensure security measures** are in place
 
-**When to use**: Before mainnet deployment (after regtest success)
-
----
-
-## 🎯 **Recommended Usage Workflow**
-
-### **Phase 1: Understanding (Day 1)**
-1. 📖 **Read PRE_DEPLOYMENT_RESEARCH.md** - Understand architecture decisions
-2. 📖 **Skim ROYALTY_DEPLOYMENT_GUIDE.md** - Get overview of deployment process
-3. 🎯 **Understand** multi-token payment system (frBTC + BUSD)
-
-### **Phase 2: Preparation (Days 2-3)**
-1. 📋 **Work through PRE_REGTEST_CHECKLIST.md** systematically
-2. 🔧 **Set up environment** (Rust, OYL SDK, regtest)
-3. 🎯 **Deploy token contracts** (frBTC and BUSD) first
-4. 📝 **Update token IDs** in collection contract
-
-### **Phase 3: Regtest Deployment (Days 4-7)**
-1. 🚀 **Follow ROYALTY_DEPLOYMENT_GUIDE.md** exactly
-2. 🧪 **Run all 11 test scenarios**
-3. 💰 **Practice withdrawal** procedures
-4. 🔄 **Repeat until perfect** (multiple clean deployments)
-
-### **Phase 4: Mainnet Preparation (Days 8-14)**
-1. ⏰ **Wait minimum 48 hours** of regtest stability
-2. 📋 **Complete PRE_MAINNET_CHECKLIST.md** entirely
-3. 🔒 **Security audit** and team review
-4. 💰 **Financial preparation** and address verification
-
-### **Phase 5: Mainnet Deployment (Day 15+)**
-1. 🚀 **Deploy to mainnet** following same process
-2. 🧪 **Run verification tests** immediately
-3. 📊 **Monitor for 24-48 hours**
-4. 🎉 **Launch your unavoidable royalty system!**
+**When to use**: After successful regtest testing, before mainnet deployment
 
 ---
 
-## 🎯 **Key Configuration Requirements**
+## 🎯 **Current Status & Next Steps**
 
-### **Token Deployment Order**
-```bash
-# 1. Deploy frBTC contract → Get AlkaneId (e.g., 2:1000)
-# 2. Deploy BUSD contract → Get AlkaneId (e.g., 2:1001) 
-# 3. Update collection contract constants:
-const FRBTC_TOKEN_ID: AlkaneId = AlkaneId { block: 2, tx: 1000 };
-const BUSD_TOKEN_ID: AlkaneId = AlkaneId { block: 2, tx: 1001 };
+### **✅ Completed**
+- [x] 📖 **System Architecture** documented
+- [x] 🔍 **Research phase** completed  
+- [x] 📦 **Contracts built** and compressed to WASM:
+  - Collection: `310KB → 113KB` (.gz)
+  - Child: `195KB → 69KB` (.gz)
+- [x] 🏗️ **Development environment** ready (Docker regtest + OYL SDK)
+
+### **🎯 Current Step: Token Deployment**
+**Your immediate next action**:
+
+1. **📋 Open**: `PRE_REGTEST_CHECKLIST.md`
+2. **🪙 Deploy**: Test frBTC token using OYL SDK
+3. **🪙 Deploy**: Test BUSD token using OYL SDK  
+4. **📝 Record**: Both AlkaneIds for contract configuration
+5. **🔧 Update**: Collection contract constants with real token IDs
+
+### **📋 Deployment Sequence**
+```
+Phase 1: Token Setup 🪙
+├── Deploy test frBTC token
+├── Deploy test BUSD token  
+└── Record AlkaneIds
+
+Phase 2: Contract Configuration 🔧
+├── Update FRBTC_TOKEN_ID in collection contract
+├── Update BUSD_TOKEN_ID in collection contract
+└── Rebuild & compress WASM files
+
+Phase 3: Contract Deployment 🚀
+├── Deploy child contract template
+├── Update ROYALTY_NFT_ORBITAL_TEMPLATE_ID
+├── Deploy collection contract
+└── Record all AlkaneIds
+
+Phase 4: Testing & Verification 🧪
+├── Execute all 11 test scenarios
+├── Verify royalty enforcement
+├── Test revenue withdrawal
+└── Document results
 ```
 
-### **Critical Configuration Points**
-- ✅ **Token IDs must match deployed contracts** (not placeholder values)
-- ✅ **Pricing must reflect current token values** 
-- ✅ **Template ID must match deployed child contract**
-- ✅ **All constants updated before deployment**
+---
+
+## 📊 **File Usage Matrix**
+
+| Phase | Primary File | Supporting Files | Purpose |
+|-------|-------------|------------------|---------|
+| **Planning** | `SYSTEM_ARCHITECTURE.md` | All files | Understand complete system |
+| **Token Setup** | `PRE_REGTEST_CHECKLIST.md` | `MULTI_TOKEN_DEPLOYMENT_GUIDE.md` | Deploy test tokens |
+| **Deployment** | `ROYALTY_DEPLOYMENT_GUIDE.md` | `PRE_REGTEST_CHECKLIST.md` | Deploy contracts |
+| **Testing** | `ROYALTY_DEPLOYMENT_GUIDE.md` | `SYSTEM_ARCHITECTURE.md` | Verify functionality |
+| **Production** | `PRE_MAINNET_CHECKLIST.md` | All files | Mainnet preparation |
 
 ---
 
-## 🚨 **Important Notes**
+## 🎊 **Revolutionary Features Ready for Deployment**
 
-### **⚠️ What NOT to Skip**
-- 🚫 **Never skip PRE_REGTEST_CHECKLIST.md** - prevents major issues
-- 🚫 **Never skip testing** - all 11 tests must pass
-- 🚫 **Never rush to mainnet** - 48+ hour regtest minimum
-- 🚫 **Never deploy without token contracts first**
-
-### **✅ Success Indicators**
-- 🎯 **All tests pass** without any errors
-- 💰 **Withdrawal functions** work for both tokens
-- 🔒 **Royalty enforcement** cannot be bypassed
-- 🏪 **Marketplace integration** examples work
-
-### **🆘 When to Get Help**
-- ❌ **Any checklist item fails** repeatedly
-- ❌ **Tests don't pass** after multiple attempts
-- ❌ **Contract compilation errors** you can't resolve
-- ❌ **Token deployment issues**
+Your system includes:
+- 🔒 **100% Unavoidable Royalties** - No bypass methods possible
+- 🎨 **Pure Algorithmic Art** - 6 styles × 12 palettes × infinite variations  
+- 💰 **Multi-Token Payments** - frBTC and BUSD flexibility
+- 💎 **Limited Supply** - Only 3,333 unique NFTs
+- 🛡️ **Production Security** - Enterprise-grade safety features
 
 ---
 
-## 🎉 **What You're Building**
+## 🚀 **Ready to Make History!**
 
-**The World's First Truly Unavoidable Bitcoin NFT Royalty System**
+**📋 Your immediate next step**: 
+1. Open `PRE_REGTEST_CHECKLIST.md`
+2. Begin Phase 1: Deploy test tokens (frBTC and BUSD)
+3. Work through the checklist systematically
 
-### **Revolutionary Features**:
-- 🔒 **100% unavoidable** - no bypass methods exist
-- 💰 **Multi-token support** - frBTC and BUSD payments
-- 🛡️ **Safe failures** - no asset loss in failed transactions
-- 🏪 **Marketplace enforcement** - platforms must comply
-- 💸 **Flexible withdrawals** - by token type
-- 🎯 **Owner-only revenue** - secure and private
-
-### **Technical Achievement**:
-- ✅ **PSBTs cannot bypass** the system
-- ✅ **Direct transfers blocked** - only royalty transfers work
-- ✅ **5% minimum royalty** with 1000 sat floor
-- ✅ **Batch minting support** up to 3 NFTs per transaction
-- ✅ **Dynamic pricing** based on token type
+**🎊 You're about to deploy the world's first truly unavoidable Bitcoin NFT royalty system!** 🎊
 
 ---
 
-## 📞 **Ready to Start?**
-
-1. 📖 **Read PRE_DEPLOYMENT_RESEARCH.md** first (just for understanding)
-2. 📋 **Open PRE_REGTEST_CHECKLIST.md** and start working through it
-3. 🚀 **Deploy tokens first**, then update your constants
-4. 🎯 **Follow ROYALTY_DEPLOYMENT_GUIDE.md** for actual deployment
-
-**You're about to make Bitcoin NFT history!** 🚀 
+*Last Updated: $(date) | Build Status: Ready | Contracts: Compressed WASM Available* 

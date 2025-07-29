@@ -17,20 +17,20 @@ use std::sync::Arc;
 mod svg_generator;
 use svg_generator::SvgGenerator;
 
-/// Orbital template ID / Child contract template
-const ROYALTY_NFT_ORBITAL_TEMPLATE_ID: u128 = 0x378;
+/// Orbital template ID / Child contract template  
+const ROYALTY_NFT_ORBITAL_TEMPLATE_ID: u128 = ((2u128 << 32) | 3u128); // ✅ UPDATED: [2, 3] from deployment
 
 /// Payment configuration - Multi-token support
 /// UPDATE THESE IDs FOR YOUR TARGET NETWORK
 
 /// For regtest, deploy your wrapped tokens first and update these IDs
 /// For mainnet, use the actual deployed token IDs
-const FRBTC_TOKEN_ID: AlkaneId = AlkaneId { block: 0, tx: 0 }; // UPDATE: Deploy frBTC first
-const BUSD_TOKEN_ID: AlkaneId = AlkaneId { block: 0, tx: 0 };  // UPDATE: Deploy BUSD first
+const FRBTC_TOKEN_ID: AlkaneId = AlkaneId { block: 2, tx: 1 }; // ✅ UPDATED: Test frBTC deployed
+const BUSD_TOKEN_ID: AlkaneId = AlkaneId { block: 2, tx: 2 };  // ✅ UPDATED: Test BUSD deployed
 
 /// Payment amounts per token type (adjust based on token values)
 const FRBTC_AMOUNT_PER_MINT: u128 = 10000; // 0.0001 BTC equivalent in satoshis
-const BUSD_AMOUNT_PER_MINT: u128 = 1000000; // $10 in BUSD (assuming 6 decimals)
+const BUSD_AMOUNT_PER_MINT: u128 = 10000000; // $10 in BUSD (6 decimals: 10.000000)
 
 /// Batch minting limits
 const MAX_PURCHASE_PER_TX: u128 = 3; // Maximum NFTs per transaction
