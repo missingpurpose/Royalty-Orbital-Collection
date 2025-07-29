@@ -30,7 +30,7 @@ const BUSD_TOKEN_ID: AlkaneId = AlkaneId { block: 2, tx: 2 };  // ✅ UPDATED: T
 
 /// Payment amounts per token type (adjust based on token values)
 const FRBTC_AMOUNT_PER_MINT: u128 = 10000; // 0.0001 BTC equivalent in satoshis
-const BUSD_AMOUNT_PER_MINT: u128 = 10000000; // $10 in BUSD (6 decimals: 10.000000)
+const BUSD_AMOUNT_PER_MINT: u128 = 1000000; // $10 in BUSD (assuming 6 decimals)
 
 /// Batch minting limits
 const MAX_PURCHASE_PER_TX: u128 = 3; // Maximum NFTs per transaction
